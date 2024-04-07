@@ -10,7 +10,7 @@ The examples provided on webhint.io are written with the `bash` command-line
 shell. For more information about `bash`, go to
 [Bash Guide for Beginners][TldpLdpBashBeginnersGuide].
 
-To verify that you have Node.js (version 10 or later) and `npm` installed, open
+To verify that you have Node.js (version 14 or later) and `npm` installed, open
 a `bash` command-line interface and run the following command:
 
 ```bash
@@ -22,6 +22,9 @@ node -v && npm -v
 To get started using `webhint` to improve your site performance and learn about
 best practices that may be applied to your site, complete the following steps.
 
+1. Ensure you have [Chrome](https://www.google.com/chrome/),
+   [Chromium](https://www.chromium.org/getting-involved/download-chromium),
+   or [Edge](https://www.microsoft.com/edge) installed.
 1. Run the command in the following code snippet.  The following code snippet
    uses `npx` to run the `npm` package without installing it.
 
@@ -81,7 +84,7 @@ update your `package.json` file.
    npm install hint --save-dev
    ```
 
-   You have also use `i` in place of `install` and `-D` in place of
+   You can also use `i` in place of `install` and `-D` in place of
    `--save-dev`.
 
    ```bash

@@ -56,7 +56,7 @@ test('It translates basic JSX to HTML', async (t) => {
     const { html } = await emitFetchEndJSX(engine, `const jsx = <div>Test</div>;`);
 
     t.true(receivedStart);
-    t.is(html, `<!doctype html>\n<html data-webhint-fragment=""><head></head><body><div>Test</div></body></html>`);
+    t.is(html, `<html><head></head><body><div>Test</div></body></html>`);
 });
 
 test('It does not emit HTML events if no JSX is present', async (t) => {
@@ -96,11 +96,25 @@ test('It serializes attributes', async (t) => {
     t.is(button.outerHTML, '<button type="button">Test</button>');
 });
 
-test('It ignores spread attributes', async (t) => {
-    const { document } = await parseJSX(`const jsx = <button type="button" {...foo}>Test</button>;`);
+test('It replaces spread attributes with a placeholder', async (t) => {
+    const { document } = await parseJSX(`const jsx = <button type="button" title="test" {...foo}>Test</button>;`);
     const button = document.querySelectorAll('button')[0];
 
-    t.is(button.outerHTML, '<button type="button">Test</button>');
+    t.is(button.outerHTML, '<button type="button" title="test" {...spread}="">Test</button>');
+});
+
+test('It synthesizes a title attribute when spread notation is used', async (t) => {
+    const { document } = await parseJSX(`const jsx = <input {...props}/>;`);
+    const button = document.querySelectorAll('input')[0];
+
+    t.is(button.getAttribute('title'), '{expression}');
+});
+
+test('It keeps an existing title attribute when spread notation is used', async (t) => {
+    const { document } = await parseJSX(`const jsx = <input title="Name" {...props}/>;`);
+    const button = document.querySelectorAll('input')[0];
+
+    t.is(button.getAttribute('title'), 'Name');
 });
 
 test('It handles boolean attributes', async (t) => {
@@ -147,18 +161,25 @@ test('It replaces expressions with text placeholders', async (t) => {
     t.is(div.innerHTML, '{expression}');
 });
 
-test('It wraps expression placeholder text with <li> when parented to <ul>', async (t) => {
-    const { document } = await parseJSX(`const jsx = <ul>{myText}</ul>;`);
+test('It drops expression placeholder text when parented to <ul>', async (t) => {
+    const { document } = await parseJSX(`const jsx = <ul>{myItems}</ul>;`);
     const ul = document.querySelectorAll('ul')[0];
 
-    t.is(ul.innerHTML, '<li>{expression}</li>');
+    t.is(ul.innerHTML, '');
 });
 
-test('It wraps expression placeholder text with <li> when parented to <ol>', async (t) => {
-    const { document } = await parseJSX(`const jsx = <ol>{myText}</ol>;`);
+test('It drops expression placeholder text when parented to <ol>', async (t) => {
+    const { document } = await parseJSX(`const jsx = <ol>{items.map(item=>(<li>{item}</li>))}</ol>;`);
     const ol = document.querySelectorAll('ol')[0];
 
     t.is(ol.innerHTML, '<li>{expression}</li>');
+});
+
+test('It drops expression placeholder text when parented to <dl>', async (t) => {
+    const { document } = await parseJSX(`const jsx = <dl>{myText}<dt>Term</dt><dd>Def</dd></dl>;`);
+    const ul = document.querySelectorAll('dl')[0];
+
+    t.is(ul.innerHTML, '<dt>Term</dt><dd>Def</dd>');
 });
 
 test('It translates source locations correctly', async (t) => {
@@ -166,7 +187,7 @@ test('It translates source locations correctly', async (t) => {
     const div = document.querySelectorAll('div')[0];
     const { column, line } = div.getLocation();
 
-    t.is(column, 13);
+    t.is(column, 12);
     t.is(line, 1);
 });
 

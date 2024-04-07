@@ -1,9 +1,7 @@
-import anyTest, { TestInterface, ExecutionContext } from 'ava';
+import anyTest, { TestFn, ExecutionContext } from 'ava';
 import * as chalk from 'chalk';
 import * as sinon from 'sinon';
 import * as proxyquire from 'proxyquire';
-import * as logSymbols from 'log-symbols';
-const stripAnsi = require('strip-ansi');
 
 import * as problems from './fixtures/list-of-problems';
 import { severityToColor } from '@hint/utils';
@@ -22,7 +20,7 @@ type CodeframeContext = {
     writeFileAsyncDefaultStub: sinon.SinonStub<any, void>;
 };
 
-const test = anyTest as TestInterface<CodeframeContext>;
+const test = anyTest as TestFn<CodeframeContext>;
 
 const initContext = (t: ExecutionContext<CodeframeContext>) => {
     t.context.logging = { log() { } };
@@ -112,7 +110,7 @@ ${sourceCode[2].substr(8)}
 ${sourceCode[3]}
 …
 
-${severityToColor(Severity.error).bold(`${logSymbols.error} Found a total of 1 error, 2 warnings, 1 hint and 1 information`)}`;
+${severityToColor(Severity.error).bold(`× Found a total of 1 error, 2 warnings, 1 hint and 1 information`)}`;
 
     return expectedLogResult;
 };
@@ -174,7 +172,7 @@ ${sourceCode[2].substr(8)}
 ${sourceCode[3]}
 …
 
-${stripAnsi(logSymbols.error)} Found a total of 1 error, 2 warnings, 1 hint and 1 information`;
+× Found a total of 1 error, 2 warnings, 1 hint and 1 information`;
 
     return expectedLogResult;
 };

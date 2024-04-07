@@ -1,14 +1,12 @@
-import { CheckResult, AxeResults, ImpactValue, NodeResult as AxeNodeResult } from 'axe-core';
+import { CheckResult, AxeResults, ImpactValue, NodeResult as AxeNodeResult, run, source, ElementContext } from 'axe-core';
 
-import { HTMLDocument, HTMLElement } from '@hint/utils-dom';
-import { readFileAsync } from '@hint/utils-fs';
+import { HTMLElement } from '@hint/utils-dom';
 import { CanEvaluateScript } from 'hint/dist/src/lib/types';
 import { HintContext } from 'hint/dist/src/lib/hint-context';
 import { Severity } from '@hint/utils-types';
+import { getAsUri } from '@hint/utils-network';
 
 import { getMessage } from '../i18n.import';
-
-const axeCorePromise = readFileAsync(require.resolve('axe-core'));
 
 type EngineKey = object;
 
@@ -34,7 +32,13 @@ type RegistrationMap = Map<EngineKey, Map<string, Registration[]>>;
 const registrationMap: RegistrationMap = new Map();
 
 const getElement = (context: HintContext, node: AxeNodeResult): HTMLElement | undefined | null => {
-    const selector = node.target[0];
+    let selector = node.target[0];
+
+    // Contrary to types, axe-core can return an array of strings. Take the first.
+    /* istanbul ignore next */
+    if (Array.isArray(selector)) {
+        selector = selector[0];
+    }
 
     return context.pageDOM?.querySelector(selector);
 };
@@ -95,6 +99,7 @@ const useRegistrations = (engineKey: EngineKey, resource: string, map: Registrat
 
     const registrations = registrationsByResource.get(resource);
 
+    /* istanbul ignore next */
     if (!registrations) {
         return null;
     }
@@ -130,9 +135,18 @@ const withQuotes = (ruleId: string) => {
     return `'${ruleId}'`;
 };
 
-const run = async (context: HintContext, event: CanEvaluateScript, rules: string[]): Promise<AxeResults | null> => {
-    const axeCoreSource = await axeCorePromise;
+const evaluateAxe = async (context: HintContext, event: CanEvaluateScript, rules: string[]): Promise<AxeResults | null> => {
     const { document, resource } = event;
+
+    /**
+     * iframes scan is ignored for local files due to error:
+     * 'allowedOrigins value "null" is not a valid origin'
+     *
+     * This is caused by an axe-core bug which is currently tracked here:
+     * https://github.com/dequelabs/axe-core/issues/3002
+     */
+    const uri = getAsUri(resource);
+    const shouldScanIframes = !(uri && uri.protocol.includes('file'));
 
     /* istanbul ignore next */
     try {
@@ -140,10 +154,11 @@ const run = async (context: HintContext, event: CanEvaluateScript, rules: string
             'document.body' :
             'document';
 
-        return await context.evaluate(`(function() {
-            ${axeCoreSource}
+        return await context.evaluate(`(function(module) {
+            ${source}
             var target = ${target};
             return window.axe.run(target, {
+                iframes: ${shouldScanIframes},
                 runOnly: {
                     type: 'rule',
                     values: [${rules.map(withQuotes).join(',')}]
@@ -152,12 +167,15 @@ const run = async (context: HintContext, event: CanEvaluateScript, rules: string
         })()`);
     } catch (e) {
 
+        const err = e as Error;
         let message: string;
 
-        if (e.message.includes('evaluation exceeded')) {
+        console.error(`Running axe-core failed: ${err.message}\n${err.stack}`);
+
+        if (err.message.includes('evaluation exceeded')) {
             message = getMessage('notFastEnough', context.language);
         } else {
-            message = getMessage('errorExecuting', context.language, e.message);
+            message = getMessage('errorExecuting', context.language, err.message);
         }
 
         message = getMessage('tryAgainLater', context.language, message);
@@ -202,10 +220,11 @@ export const register = (context: HintContext, rules: string[], disabled: string
         return !disabled.includes(rule);
     });
 
-    context.on('can-evaluate::script', (event) => {
+    context.on('traverse::end', (event) => {
         queueRegistration({ context, enabledRules, event, options }, registrationMap);
     });
 
+    // Used when we have to evaluate axe in a different context (e.g. connector-puppeteer and nearly everything else).
     context.on('scan::end', async ({ resource }) => {
         const registrations = useRegistrations(engineKey, resource, registrationMap);
 
@@ -213,23 +232,33 @@ export const register = (context: HintContext, rules: string[], disabled: string
             return;
         }
 
-        // TS doesn't detect we are assigning during `reduce`
-        let document!: HTMLDocument;
+        const ruleToRegistration = new Map<string, Registration>();
 
-        const ruleToRegistration = registrations.reduce((map, registration) => {
+        for (const registration of registrations) {
+            for (const rule of registration.enabledRules) {
+                ruleToRegistration.set(rule, registration);
+            }
+        }
 
-            // `document` should be the same for all registrations of the same `resource`.
-            document = document || registration.event.document;
-
-            registration.enabledRules.forEach((rule) => {
-                map.set(rule, registration);
-            });
-
-            return map;
-        }, new Map<string, Registration>());
-
+        const document = registrations[0].event.document;
         const rules = Array.from(ruleToRegistration.keys());
-        const result = await run(context, { document, resource }, rules);
+
+        let result: AxeResults | null = null;
+
+        if (document.defaultView) {
+            // If we're in the same context as the document, run axe directly (e.g. utils-worker).
+            const target = document.isFragment ? document.body : document.documentElement;
+
+            result = await run(target as ElementContext, {
+                runOnly: {
+                    type: 'rule',
+                    values: rules
+                }
+            });
+        } else {
+            // Otherwise evaluate axe in the provided context (e.g. connector-puppeter, everything else).
+            result = await evaluateAxe(context, { document, resource }, rules);
+        }
 
         /* istanbul ignore next */
         if (!result || !Array.isArray(result.violations)) {
@@ -242,9 +271,11 @@ export const register = (context: HintContext, rules: string[], disabled: string
                 const message = summary ? `${violation.help}: ${summary}` : violation.help;
                 const registration = ruleToRegistration.get(violation.id)!;
                 const element = getElement(context, node);
-                const severity = Severity[registration.options[violation.id]] === Severity.default ?
+                const ruleSeverity = Severity[registration.options[violation.id]] ?? Severity.default;
+                const forceSeverity = ruleSeverity !== Severity.default;
+                const severity = !forceSeverity ?
                     toSeverity(violation.impact) :
-                    Severity[registration.options[violation.id]];
+                    ruleSeverity;
 
                 registration.context.report(resource, message, {
                     documentation: [{
@@ -252,6 +283,7 @@ export const register = (context: HintContext, rules: string[], disabled: string
                         text: getMessage('learnMore', context.language)
                     }],
                     element,
+                    forceSeverity,
                     severity
                 });
             }

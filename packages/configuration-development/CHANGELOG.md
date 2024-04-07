@@ -1,3 +1,28 @@
+# 8.3.13 (March 17, 2023)
+
+## Bug fixes / Improvements
+
+* [[`b67edd8443`](https://github.com/webhintio/hint/commit/b67edd8443f500439e7c75c804aed7d40ffe8198)] - Fix: Fixing the right dependency (by [`Vidal Ortega`](https://github.com/vidorteg)).
+
+## Chores
+
+* [[`a5499c3973`](https://github.com/webhintio/hint/commit/a5499c3973aa9afe767df3c1aa6b58d2f8622626)] - Chore: Adding detect-css-reflows to some configs (#5466) (by [`Vidal Ortega`](https://github.com/vidorteg)).
+
+
+# 8.3.2 (March 9, 2022)
+
+## Bug fixes / Improvements
+
+* [[`addc5fc30a`](https://github.com/webhintio/hint/commit/addc5fc30a24a5c8183db6b625c4a937225de569)] - Fix: Disable typescript-config/import-helpers by default (by [`Tony Ross`](https://github.com/antross) / see also: [`#4526`](https://github.com/webhintio/hint/issues/4526)).
+
+
+# 8.3.0 (November 4, 2021)
+
+## New features
+
+* [[`a66668de7f`](https://github.com/webhintio/hint/commit/a66668de7fb38ee218d517f12dc38ce348ab8bd0)] - New: Disable typescript-config/no-comments by default (by [`Tony Ross`](https://github.com/antross) / see also: [`#4839`](https://github.com/webhintio/hint/issues/4839)).
+
+
 # 8.2.0 (February 4, 2021)
 
 ## New features

@@ -1,3 +1,60 @@
+# 1.0.11 (June 8, 2023)
+
+## Chores
+
+* [[`a44ec65bd0`](https://github.com/webhintio/hint/commit/a44ec65bd02078e7d6110ebe0e6ee1b107529c87)] - Upgrade: Bump eslint-plugin-import from 2.26.0 to 2.27.5 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5481`](https://github.com/webhintio/hint/issues/5481)).
+* [[`5f2e5c418b`](https://github.com/webhintio/hint/commit/5f2e5c418b8d7d61e07d7e3e9655cc5ccb094979)] - Upgrade: Bump rimraf from 3.0.2 to 5.0.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5550`](https://github.com/webhintio/hint/issues/5550)).
+
+
+# 1.0.10 (May 3, 2022)
+
+## Chores
+
+* [[`8789e1e673`](https://github.com/webhintio/hint/commit/8789e1e67334c34290065b30b676f0125f288ad4)] - Upgrade: Bump eslint-plugin-import from 2.25.4 to 2.26.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5140`](https://github.com/webhintio/hint/issues/5140)).
+
+
+# 1.0.9 (April 26, 2022)
+
+## Chores
+
+* [[`832e11b0ff`](https://github.com/webhintio/hint/commit/832e11b0ff442fe672c0f7a75c52f76fd0428192)] - Upgrade: Bump debug from 4.3.3 to 4.3.4 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+
+
+# 1.0.8 (March 9, 2022)
+
+## Chores
+
+* [[`de1ef98436`](https://github.com/webhintio/hint/commit/de1ef9843660c912f6a4e05ee741d25c6eddd01e)] - Upgrade: Bump typescript from 4.3.5 to 4.5.5 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#4996`](https://github.com/webhintio/hint/issues/4996)).
+* [[`c95b2bb7f7`](https://github.com/webhintio/hint/commit/c95b2bb7f711c94945c50c8dc4465fe5ceec57c4)] - Upgrade: Bump eslint-plugin-import from 2.25.3 to 2.25.4 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`4cf3796723`](https://github.com/webhintio/hint/commit/4cf379672322988847a718c052ee51f5cf5175be)] - Upgrade: Bump debug from 4.3.2 to 4.3.3 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`7dfef85ed6`](https://github.com/webhintio/hint/commit/7dfef85ed680b533d7f9b099effcbf528fb1f072)] - Upgrade: Bump eslint-plugin-import from 2.25.2 to 2.25.3 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`6324037022`](https://github.com/webhintio/hint/commit/6324037022ef35767571bfb5aaa9c17384231ebc)] - Upgrade: Bump eslint from 7.29.0 to 7.32.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+
+
+# 1.0.7 (November 4, 2021)
+
+## Chores
+
+* [[`7173d6721d`](https://github.com/webhintio/hint/commit/7173d6721d1cbca66347a5040c0b81db8b01f993)] - Upgrade: Bump eslint-plugin-import from 2.23.4 to 2.25.2 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+
+
+# 1.0.6 (October 21, 2021)
+
+## Bug fixes / Improvements
+
+* [[`245987307b`](https://github.com/webhintio/hint/commit/245987307bfcd93c60f90796ae2a2d682e314d08)] - Fix: Remove telemetry (by [`Tony Ross`](https://github.com/antross) / see also: [`#4734`](https://github.com/webhintio/hint/issues/4734)).
+
+## Chores
+
+* [[`2d60bc97ad`](https://github.com/webhintio/hint/commit/2d60bc97adb2ccbd608247d7083c2a3486832895)] - Upgrade: Bump typescript from 4.2.4 to 4.3.5 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview) / see also: [`#4675`](https://github.com/webhintio/hint/issues/4675)).
+* [[`3923e6cc84`](https://github.com/webhintio/hint/commit/3923e6cc84dfdfa5120cf1b877be8257e068e0a7)] - Upgrade: Bump eslint-plugin-markdown from 2.2.0 to 2.2.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`05828de776`](https://github.com/webhintio/hint/commit/05828de77666ea6bda50fbed75ac17d656158d09)] - Upgrade: Bump debug from 4.3.1 to 4.3.2 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+* [[`2ad0f23c83`](https://github.com/webhintio/hint/commit/2ad0f23c83c9818bd145105a3ccc20b0b69a3015)] - Upgrade: Bump @types/debug from 4.1.6 to 4.1.7 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+* [[`e9b2e3f423`](https://github.com/webhintio/hint/commit/e9b2e3f4232f50d1c9dba44f250629f878b13f4f)] - Upgrade: Bump eslint-plugin-import from 2.22.1 to 2.23.4 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+* [[`ca8bffbb01`](https://github.com/webhintio/hint/commit/ca8bffbb01873c1342f8e00167e59c31b0e00fe9)] - Upgrade: Bump @types/debug from 4.1.5 to 4.1.6 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+* [[`2b8ce4e4aa`](https://github.com/webhintio/hint/commit/2b8ce4e4aac6c3802643606be8973c9e01a573af)] - Upgrade: Bump eslint from 7.27.0 to 7.29.0 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+
+
 # 1.0.5 (June 9, 2021)
 
 ## Chores

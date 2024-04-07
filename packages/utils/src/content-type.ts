@@ -319,7 +319,7 @@ const determineMediaTypeBasedOnFileType = async (rawContent: Buffer) => {
         }
 
         // Use the media types from `mime-db`, not `file-type`.
-        return getMediaTypeBasedOnFileExtension(detectedFileType.ext);
+        return determineMediaTypeBasedOnFileExtension(detectedFileType.ext);
     }
 
     return null;
@@ -369,7 +369,7 @@ const parseContentTypeHeader = (headers: HttpHeaders | null): MediaType | null =
 
         contentType = parse(contentTypeHeaderValue);
     } catch (e) {
-        debug(`'content-type' header value is invalid (${e.message})`);
+        debug(`'content-type' header value is invalid (${(e as Error).message})`);
 
         return null;
     }

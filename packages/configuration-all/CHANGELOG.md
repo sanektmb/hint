@@ -1,3 +1,17 @@
+# 3.0.9 (March 17, 2023)
+
+## Bug fixes / Improvements
+
+* [[`b67edd8443`](https://github.com/webhintio/hint/commit/b67edd8443f500439e7c75c804aed7d40ffe8198)] - Fix: Fixing the right dependency (by [`Vidal Ortega`](https://github.com/vidorteg)).
+
+
+# 3.0.0 (June 6, 2022)
+
+## Breaking Changes
+
+* [[`bd0f4e2ae0`](https://github.com/webhintio/hint/commit/bd0f4e2ae0a5d111ba8b687d320a5fa5ec8600d8)] - Breaking: Remove hint-amp-validator (by [`Tony Ross`](https://github.com/antross)).
+
+
 # 2.0.1 (December 3, 2019)
 
 

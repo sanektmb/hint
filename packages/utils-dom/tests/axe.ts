@@ -31,27 +31,57 @@ const runAxe = async (html: string, rule: string) => {
 };
 
 type TestOptions = {
-    pass: string;
-    fail: string;
+    pass: string | string[];
+    fail: string | string[];
 }
 
 const testAxe = async (t: ExecutionContext, { pass, fail }: TestOptions) => {
     const rule = t.title;
-    const passResults = await runAxe(pass, rule);
-    const failResults = await runAxe(fail, rule);
+    const passTests = Array.isArray(pass) ? pass : [pass];
+    const failTests = Array.isArray(fail) ? fail : [fail];
 
-    t.log(passResults.violations[0]);
-    t.log(failResults);
+    for (const p of passTests) {
+        const results = await runAxe(p, rule);
+        const errors = results.incomplete.filter((v) => {
+            return (v as any).error;
+        });
 
-    t.is(failResults.violations.length, 1);
-    t.is(failResults.violations[0].id, rule);
-    t.is(passResults.violations.length, 0);
+        if (results.violations.length || errors.length) {
+            t.log(results);
+        }
+        t.is(results.violations.length, 0, 'All rules should pass');
+        t.is(errors.length, 0, 'No rules should be incomplete due to an error');
+    }
+
+    for (const f of failTests) {
+        const results = await runAxe(f, rule);
+        const errors = results.incomplete.filter((v) => {
+            return (v as any).error;
+        });
+
+        if (!results.violations.length || errors.length) {
+            t.log(results);
+        }
+        t.is(results.violations.length, 1, 'One rule should fail');
+        t.is(results.violations[0].id, rule, 'The failed rule id should match the test');
+        t.is(errors.length, 0, 'No rules should be incomplete due to an error');
+    }
 };
 
 test.serial('aria-hidden-focus', async (t) => {
     await testAxe(t, {
         fail: '<p tabindex="0" aria-hidden="true">test</p>',
         pass: '<p aria-hidden="true">test</p>'
+    });
+});
+
+test.serial('form-field-multiple-labels', async (t) => {
+    await testAxe(t, {
+        fail: [],
+        pass: [
+            '<label for="test">One</label><input id="test">',
+            '<label for="test">Hi</label><label for="test">Foo</label><input type="text" id="test" />'
+        ]
     });
 });
 
@@ -106,7 +136,10 @@ test.serial('image-alt', async (t) => {
 
 test.serial('label', async (t) => {
     await testAxe(t, {
-        fail: '<label>Name</label><input id="name">',
+        fail: [
+            '<label>Name</label><input id="name">',
+            '<input type="search"><label for="test">Test</label><input id="test">'
+        ],
         pass: '<label for="name">Name</label><input id="name">'
     });
 });
@@ -127,7 +160,7 @@ test.serial('list', async (t) => {
 
 test.serial('listitem', async (t) => {
     await testAxe(t, {
-        fail: '<li>test</li>',
+        fail: '<html><li>test</li></html>',
         pass: '<ul><li>test</li></ul>'
     });
 });

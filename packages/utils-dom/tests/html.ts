@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import anyTest, { TestInterface } from 'ava';
+import anyTest, { TestFn } from 'ava';
 
 import { createHTMLDocument, HTMLDocument } from '../src';
 
@@ -9,7 +9,7 @@ type HTMLContext = {
     document: HTMLDocument;
 };
 
-const test = anyTest as TestInterface<HTMLContext>;
+const test = anyTest as TestFn<HTMLContext>;
 
 const html = fs.readFileSync(path.join(__dirname, 'fixtures', 'test-html.html'), 'utf-8'); // eslint-disable-line no-sync
 const serializedHTML = fs.readFileSync(path.join(__dirname, 'fixtures', 'serialized-test-html.html'), 'utf-8'); // eslint-disable-line no-sync
@@ -33,10 +33,10 @@ test('HTMLDocument.compatMode should return "CSS1Compat" if standards', (t) => {
 });
 
 test('HTMLDocument.compatMode should return "BackCompat" if not standards', (t) => {
-    const document = createHTMLDocument(`<table border="1">
+    const document = createHTMLDocument(`<html><table border="1">
     <tr><td>one</td><td>two</td></tr>
     <tr><td>three</td><td bgcolor="yellow"></td></tr>
-   </table>`, 'http://example.com');
+   </table></html>`, 'http://example.com');
 
     t.is(document.compatMode, 'BackCompat');
 });
@@ -88,7 +88,7 @@ test('HTMLElement.getLocation() should return the element location', (t) => {
     const location = item.getLocation();
 
     t.is(location && location.line, 6);
-    t.is(location && location.column, 9);
+    t.is(location && location.column, 8);
 });
 
 test('HTMLElement.isSame() should return if an item is the same or not', (t) => {

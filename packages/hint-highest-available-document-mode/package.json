@@ -5,31 +5,32 @@
       "dist/tests/**/*.js",
       "!dist/tests/**/fixtures/**/*.js"
     ],
-    "timeout": "1m"
+    "timeout": "1m",
+    "workerThreads": false
   },
   "dependencies": {
-    "@hint/utils-i18n": "^1.0.8",
-    "@hint/utils-network": "^1.0.10",
-    "@hint/utils-string": "^1.0.8",
-    "@hint/utils-types": "^1.1.3"
+    "@hint/utils-i18n": "^1.0.15",
+    "@hint/utils-network": "^1.0.26",
+    "@hint/utils-string": "^1.0.14",
+    "@hint/utils-types": "^1.2.1"
   },
   "description": "hint for best practices related to usage of the X-UA-Compatible meta tag and response header",
   "devDependencies": {
-    "@hint/utils-create-server": "^3.4.10",
-    "@hint/utils-dom": "^2.1.6",
-    "@hint/utils-tests-helpers": "^6.3.4",
-    "@types/node": "^15.6.1",
-    "@typescript-eslint/eslint-plugin": "^4.27.0",
-    "@typescript-eslint/parser": "^4.28.1",
-    "ava": "^3.15.0",
+    "@hint/utils-create-server": "^3.4.26",
+    "@hint/utils-dom": "^2.2.4",
+    "@hint/utils-tests-helpers": "^6.5.6",
+    "@types/node": "^20.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^4.33.0",
+    "ava": "^4.3.3",
     "copyfiles": "^2.4.1",
-    "eslint": "^7.29.0",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-markdown": "^2.2.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-markdown": "^2.2.1",
     "npm-run-all": "^4.1.5",
     "nyc": "^15.1.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.2.4"
+    "rimraf": "^5.0.0",
+    "typescript": "^4.5.5"
   },
   "files": [
     "dist/src"
@@ -49,7 +50,7 @@
     "extends": "../../.nycrc"
   },
   "peerDependencies": {
-    "hint": "^6.0.0"
+    "hint": "^7.0.0"
   },
   "repository": {
     "directory": "packages/hint-highest-available-document-mode",
@@ -75,5 +76,5 @@
     "watch:test": "ava --watch",
     "watch:ts": "npm run build:ts -- --watch"
   },
-  "version": "5.0.6"
+  "version": "5.0.22"
 }

@@ -13,7 +13,52 @@ import { JSXAttribute, JSXElement, JSXExpressionContainer, JSXText, Node, Script
 type ChildMap = Map<JSXElement, Array<ElementData | TextData>>;
 type RootMap = Map<Node, ElementData>;
 
+// Per the content model defined for each element in https://html.spec.whatwg.org/
+const HTML_ELEMENTS_WITH_ONLY_NON_TEXT_CHILDREN = [
+    'colgroup',
+    'dl',
+    'hgroup',
+    'menu',
+    'ol',
+    'optgroup',
+    'picture',
+    'select',
+    'table',
+    'tbody',
+    'thead',
+    'tfoot',
+    'tr',
+    'ul'
+];
+
+/**
+ * Attributes assumed to be provided by {...spread} if not otherwise specified.
+ * Entries under "*" apply to all elements. Others apply only to specific tags.
+ */
+const EXPECTED_SPREAD_ATTRIBUTES = new Map([
+    ['*', ['title']]
+]);
+
 const debug = d(__filename);
+
+/**
+ * Add attributes we assume to be included in a spread to avoid false-positives.
+ * Most notably this includes "title" to assume a label was provided.
+ *
+ * @param tagName The name of the element being augmented.
+ * @param attribs The attributes collection to augment.
+ */
+const addExpectedSpreadAttributes = (tagName: string, attribs: { [name: string]: string }): void => {
+    const localExpectedAttributes = EXPECTED_SPREAD_ATTRIBUTES.get(tagName) ?? [];
+    const globalExpectedAttributes = EXPECTED_SPREAD_ATTRIBUTES.get('*') ?? [];
+    const expectedAttributes = [...localExpectedAttributes, ...globalExpectedAttributes];
+
+    for (const expectedAttribute of expectedAttributes) {
+        if (!attribs[expectedAttribute]) {
+            attribs[expectedAttribute] = '{expression}';
+        }
+    }
+};
 
 /**
  * Check if the provided `Node` is a native HTML element in JSX.
@@ -47,13 +92,13 @@ const isAttributeOrNativeElement = (node: Node) => {
 /**
  * Translate JS AST locations to HTML AST locations.
  */
-const mapLocation = (node: Node, { startColumnOffset = 0 } = {}): parse5.Location => {
+const mapLocation = (node: Node): parse5.Location => {
     // TODO: Remove `columnOffset` once `Problem` supports a range.
     return {
-        endCol: node.loc && (node.loc.end.column) || -1,
+        endCol: node.loc && (node.loc.end.column + 1) || -1,
         endLine: node.loc && node.loc.end.line || -1,
         endOffset: node.range && node.range[1] || -1,
-        startCol: node.loc && (node.loc.start.column + startColumnOffset) || -1,
+        startCol: node.loc && (node.loc.start.column + 1) || -1,
         startLine: node.loc && node.loc.start.line || -1,
         startOffset: node.range && node.range[0] || -1
     };
@@ -77,13 +122,17 @@ const mapAttributeName = (name: string) => {
 /**
  * Translate collections of `JSXAttribute`s to their HTML AST equivalent.
  */
-const mapAttributes = (node: JSXElement) => {
+const mapAttributes = (node: JSXElement, tagName: string) => {
     const attribs: { [name: string]: string } = {};
     const locations: parse5.AttributesLocation = {};
 
+    let hasSpread = false;
+
     for (const attribute of node.openingElement.attributes) {
-        if (attribute.type !== 'JSXAttribute') {
-            continue; // TODO: Do something useful with JSXSpreadAttribute instances.
+        if (attribute.type === 'JSXSpreadAttribute') {
+            attribs['{...spread}'] = '';
+            hasSpread = true;
+            continue;
         }
         /* istanbul ignore if */
         if (attribute.name.type !== 'JSXIdentifier') {
@@ -107,6 +156,10 @@ const mapAttributes = (node: JSXElement) => {
         locations[name] = mapLocation(attribute);
     }
 
+    if (hasSpread) {
+        addExpectedSpreadAttributes(tagName, attribs);
+    }
+
     return {
         attribs,
         attrs: locations,
@@ -125,7 +178,7 @@ const mapElement = (node: JSXElement, childMap: ChildMap): ElementData => {
     }
 
     const { name } = node.openingElement.name;
-    const { attrs, ...attribs } = mapAttributes(node);
+    const { attrs, ...attribs } = mapAttributes(node, name);
     const children = childMap.get(node) || [];
 
     return {
@@ -140,9 +193,9 @@ const mapElement = (node: JSXElement, childMap: ChildMap): ElementData => {
             endTag: node.closingElement ? mapLocation(node.closingElement) : undefined as any, // TODO: Fix types to allow undefined (matches parse5 behavior)
             startTag: {
                 attrs,
-                ...mapLocation(node.openingElement, { startColumnOffset: 1 })
+                ...mapLocation(node.openingElement)
             },
-            ...mapLocation(node, { startColumnOffset: 1 })
+            ...mapLocation(node)
         },
         type: 'tag'
     };
@@ -207,49 +260,11 @@ const addChild = (data: ElementData | TextData, parent: JSXElement, children: Ch
 };
 
 /**
- * Is the node a list container (`<ul>/<ol>`).
+ * Whether the element allows text nodes as direct children.
  */
-const isListNode = (node?: JSXElement | JSXAttribute): node is JSXElement => {
-    return !!(node && node.type === 'JSXElement' &&
-        node.openingElement.name.type === 'JSXIdentifier' &&
-        (node.openingElement.name.name === 'ol' || node.openingElement.name.name === 'ul'));
-};
-
-/**
- * Create a JSXElement.
- */
-const createJSXElement = (name: string, selfClosing: boolean = false): JSXElement => {
-    return {
-        children: [],
-        closingElement: selfClosing ? null : {
-            name: {
-                name,
-                type: 'JSXIdentifier'
-            },
-            type: 'JSXClosingElement'
-        },
-        openingElement: {
-            attributes: [],
-            name: {
-                name,
-                type: 'JSXIdentifier'
-            },
-            selfClosing,
-            type: 'JSXOpeningElement'
-        },
-        type: 'JSXElement'
-    };
-};
-
-/**
- * Wrap the given `textData` in a list item (`<li>textData</li>).
- */
-const wrapInListItem = (textData: TextData, parent: JSXElement, childMap: ChildMap): ElementData => {
-    const node = createJSXElement('li');
-
-    addChild(textData, node, childMap);
-
-    return mapElement(node, childMap);
+const allowsTextChildren = (node: JSXElement): boolean => {
+    return node.openingElement.name.type === 'JSXIdentifier' &&
+        !HTML_ELEMENTS_WITH_ONLY_NON_TEXT_CHILDREN.includes(node.openingElement.name.name);
 };
 
 /**
@@ -257,12 +272,8 @@ const wrapInListItem = (textData: TextData, parent: JSXElement, childMap: ChildM
  * provided roots derived from the specified resource.
  */
 const createHTMLFragment = (roots: RootMap, resource: string) => {
-    const dom = parse5.parse(
-        `<!doctype html><html data-webhint-fragment></html>`,
-        { treeAdapter: htmlparser2Adapter }
-    ) as DocumentData;
-
-    const body = (dom.children[1] as ElementData).children[1] as ElementData;
+    const dom = parse5.parse('', { treeAdapter: htmlparser2Adapter }) as DocumentData;
+    const body = (dom.children[0] as ElementData).children[1] as ElementData;
 
     roots.forEach((root) => {
         body.children.push(root);
@@ -270,7 +281,7 @@ const createHTMLFragment = (roots: RootMap, resource: string) => {
 
     restoreReferences(dom);
 
-    return new HTMLDocument(dom, resource);
+    return new HTMLDocument(dom, resource, undefined, true);
 };
 
 export default class JSXParser extends Parser<HTMLEvents> {
@@ -298,12 +309,10 @@ export default class JSXParser extends Parser<HTMLEvents> {
                     }
                 },
                 JSXExpressionContainer(node, /* istanbul ignore next */ ancestors = []) {
+                    const data = mapExpression(node);
                     const parent = getParentAttributeOrElement(ancestors);
-                    const textData = mapExpression(node);
-                    const data = isListNode(parent) ? wrapInListItem(textData, parent, childMap) :
-                        textData;
 
-                    if (parent && parent.type !== 'JSXAttribute') {
+                    if (parent && parent.type !== 'JSXAttribute' && allowsTextChildren(parent)) {
                         addChild(data, parent, childMap);
                     }
                 },
@@ -325,7 +334,7 @@ export default class JSXParser extends Parser<HTMLEvents> {
                 await this.engine.emitAsync(`parse::start::html`, { resource });
 
                 const document = createHTMLFragment(roots, resource);
-                const html = `<!doctype html>\n${document.documentElement.outerHTML}`;
+                const html = document.documentElement.outerHTML;
 
                 debug('Generated HTML from JSX:', html);
 

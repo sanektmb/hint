@@ -1,9 +1,11 @@
 const path = require('path');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
+const svgToMiniDataURI = require('mini-svg-data-uri');
 
 module.exports = (env) => {
     return {
+        amd: false,
         context: __dirname,
         entry: {
             'background-script': './dist/src/background-script.js',
@@ -14,11 +16,6 @@ module.exports = (env) => {
         mode: env && env.release ? 'production' : 'none',
         module: {
             rules: [
-                // Bundle `axe-core` as a raw string so it can be injected at runtime.
-                {
-                    test: /axe-core/,
-                    type: 'asset/source'
-                },
                 // Bundle `js-library-detector as a raw string so it can be injected at runtime.
                 {
                     test: /js-library-detector/,
@@ -47,11 +44,13 @@ module.exports = (env) => {
                     ]
                 },
                 {
+                    generator: {
+                        dataUrl: (content) => {
+                            return svgToMiniDataURI(content.toString());
+                        }
+                    },
                     test: /\.svg$/,
-                    use: {
-                        loader: 'svg-url-loader',
-                        options: { noquotes: true }
-                    }
+                    type: 'asset/inline'
                 },
                 {
                     test: /\.md$/,
@@ -62,12 +61,23 @@ module.exports = (env) => {
         node: { __dirname: true },
         optimization: {
             minimizer: [
-                /*
-                 * Fix handling of non-ASCII characters in minified content script
-                 * when running in Chrome by forcing them to be escaped.
-                 */
-                // eslint-disable-next-line camelcase
-                new TerserPlugin({ terserOptions: { output: { ascii_only: true } } })
+                new TerserPlugin({
+                    terserOptions: {
+
+                        /**
+                         * Terser is minifying the variable name 'module' inside axe-core which causes axe-core
+                         * to fail the initialization. References: hint-axe/axe.ts:evaluateAxe
+                         */
+                        mangle: { reserved: ['module'] },
+
+                        /*
+                         * Fix handling of non-ASCII characters in minified content script
+                         * when running in Chrome by forcing them to be escaped.
+                         */
+                        // eslint-disable-next-line camelcase
+                        output: { ascii_only: true }
+                    }
+                })
             ]
         },
         output: {
@@ -89,7 +99,6 @@ module.exports = (env) => {
                 './request-async$': path.resolve(__dirname, 'dist/src/shims/request-async.js'),
                 'acorn-jsx$': path.resolve(__dirname, 'dist/src/shims/acorn-jsx.js'),
                 'acorn-jsx-walk$': path.resolve(__dirname, 'dist/src/shims/acorn-jsx-walk.js'),
-                'axe-core': require.resolve('axe-core/axe.min.js'),
                 'file-type': path.resolve(__dirname, 'dist/src/shims/file-type.js'),
                 'is-svg': path.resolve(__dirname, 'dist/src/shims/is-svg.js'),
                 url$: path.resolve(__dirname, 'dist/src/shims/url.js')

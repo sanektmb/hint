@@ -1,5 +1,6 @@
 import * as parse5 from 'parse5';
 import * as htmlparser2Adapter from 'parse5-htmlparser2-tree-adapter';
+import cssSelect, { selectOne } from 'css-select';
 
 import { ProblemLocation } from '@hint/utils-types';
 
@@ -17,6 +18,19 @@ import { getCompiledSelector } from './get-compiled-selector';
 export class HTMLElement extends Node {
     private _element: ElementData;
     private _computedStyles: CSSStyleDeclaration;
+    private _domRect = {
+        bottom: 0,
+        height: 0,
+        left: 0,
+        right: 0,
+        toJSON() {
+            return this;
+        },
+        top: 0,
+        width: 0,
+        x: 0,
+        y: 0
+    };
 
     /**
      * Non-standard. Used internally by utils-dom to create HTMLElement instances.
@@ -25,6 +39,16 @@ export class HTMLElement extends Node {
         super(element, ownerDocument);
         this._element = element;
         this._computedStyles = new CSSStyleDeclaration(element['x-styles']);
+        if (element['x-rects']) {
+            this._domRect.x = element['x-rects'].clientRect.x;
+            this._domRect.y = element['x-rects'].clientRect.y;
+            this._domRect.left = element['x-rects'].clientRect.x;
+            this._domRect.top = element['x-rects'].clientRect.y;
+            this._domRect.width = element['x-rects'].clientRect.width;
+            this._domRect.height = element['x-rects'].clientRect.height;
+            this._domRect.right = this._domRect.x + this._domRect.width;
+            this._domRect.bottom = this._domRect.y + this._domRect.height;
+        }
     }
 
     /**
@@ -101,6 +125,13 @@ export class HTMLElement extends Node {
     }
 
     /**
+     * https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+     */
+    public getBoundingClientRect(): DOMRect {
+        return this._domRect;
+    }
+
+    /**
      * Non-standard. Used internally by utils-dom for `window.getComputedStyle`.
      */
     public getComputedStyle() {
@@ -126,6 +157,15 @@ export class HTMLElement extends Node {
      */
     public setAttribute(name: string, value: string) {
         this._element.attribs[name] = value;
+    }
+
+    /**
+     * Non-standard.
+     * Check if additional attributes were provided via spread notation,
+     * meaning the exact set of provided attributes is unknown.
+     */
+    public hasAttributeSpread(): boolean {
+        return this.hasAttribute('{...spread}');
     }
 
     /**
@@ -168,15 +208,36 @@ export class HTMLElement extends Node {
 
     /**
      * Non-standard.
+     * Zero-based location of the specified attribute in original source code.
+     *
+     * @param name The name of the attribute to get the location for.
+     */
+    public getAttributeLocation(name: string): ProblemLocation {
+        const elementLocation = this._getOriginalLocation();
+        const location = elementLocation?.attrs?.[name];
+
+        return {
+            column: location ? location.startCol - 1 : -1,
+            endColumn: location ? location.endCol - 1 : -1,
+            endLine: location ? location.endLine - 1 : -1,
+            endOffset: location ? location.endOffset : -1,
+            line: location ? location.startLine - 1 : -1,
+            startOffset: location ? location.startOffset : -1
+        };
+    }
+
+    /**
+     * Non-standard.
      * Zero-based location of the element in original source code.
      */
     public getLocation(): ProblemLocation {
         const location = this._getOriginalLocation();
 
-        // Column is zero-based, but pointing to the tag name, not the character <
         return {
-            column: location ? location.startCol : -1,
+            column: location ? location.startCol - 1 : -1,
             elementId: this._element.id,
+            endColumn: location ? location.endCol - 1 : -1,
+            endLine: location ? location.endLine - 1 : -1,
             endOffset: location ? location.endOffset : -1,
             line: location ? location.startLine - 1 : -1,
             startOffset: location ? location.startOffset : -1
@@ -204,6 +265,8 @@ export class HTMLElement extends Node {
         if (offset.line === 0) {
             return {
                 column: column + offset.column,
+                endColumn: offset.endColumn && (offset.endLine === 0 ? column + offset.endColumn : offset.endColumn),
+                endLine: offset.endLine && (line + offset.endLine),
                 line
             };
         }
@@ -211,6 +274,8 @@ export class HTMLElement extends Node {
         // Otherwise adjust just the resulting line.
         return {
             column: offset.column,
+            endColumn: offset.endColumn,
+            endLine: offset.endLine && (line + offset.endLine),
             line: line + offset.line
         };
     }
@@ -228,6 +293,34 @@ export class HTMLElement extends Node {
      */
     public get innerHTML(): string {
         return parse5.serialize(this._element as htmlparser2Adapter.Node, { treeAdapter: htmlparser2Adapter });
+    }
+
+    /**
+     * https://developer.mozilla.org/docs/Web/API/Element/querySelector
+     */
+    public querySelector(selector: string): HTMLElement | null {
+        const data = selectOne(
+            getCompiledSelector(selector),
+            this._element
+        );
+
+        return data ? this.ownerDocument.getNodeFromData(data) as HTMLElement : null;
+    }
+
+    /**
+     * https://developer.mozilla.org/docs/Web/API/Element/querySelectorAll
+     */
+    public querySelectorAll(selector: string): HTMLElement[] {
+        const matches: any[] = cssSelect(
+            getCompiledSelector(selector),
+            this._element
+        );
+
+        const result = matches.map((element) => {
+            return this.ownerDocument.getNodeFromData(element);
+        });
+
+        return result as HTMLElement[];
     }
 
     /**
@@ -281,5 +374,56 @@ export class HTMLElement extends Node {
      */
     public resolveUrl(url: string) {
         return this.ownerDocument.resolveUrl(url);
+    }
+
+    /**
+     * Non-standard.
+     * Retrieves the newline type (\n, \r\n) of the element and the indent level of its child element
+     * Elements that exist only on one line will have empty strings for newlineType and indent.
+     */
+    public getChildIndent(): {indent: string; newlineType: string} {
+        const newlineType = this.outerHTML.indexOf('\r\n') === -1 ? '\n' : '\r\n';
+        const splitByLine = this.outerHTML.split(newlineType);
+
+        if (splitByLine.length === 1) {
+            return {indent: '', newlineType: ''};
+        }
+
+        if (splitByLine.length === 2) {
+            const lastLine = splitByLine[splitByLine.length - 1];
+            const nonSpaceInd = lastLine.search(/[^ ]/);
+            // Add two spaces for child indent.
+            const indent = `${lastLine.substring(0, nonSpaceInd)}  `;
+
+            return {indent, newlineType};
+        }
+        const childLine = splitByLine[1];
+        const nonSpaceInd = childLine.search(/[^ ]/);
+
+        return {indent: childLine.substring(0, nonSpaceInd), newlineType};
+    }
+
+    /**
+     * Non-standard.
+     * This helper method takes in a string (presumably representing an HTML element) and returns the resulting outerHTML text
+     * after inserting it as the first child element.
+     * removeExistingInstance is an optional boolean used if the inserted element exists as a child and we want to move it to the first child spot.
+     * This method is used to help create insertion CodeFix objects.
+     */
+    public prependChildOuterHtml(child: string, removeExistingInstance?: boolean): string {
+        const openingTagRegex = /<[^>]+>/;
+        const childIndent = this.getChildIndent();
+        const outerHTML = removeExistingInstance ? this.outerHTML.replace(child, '') : this.outerHTML;
+
+        const tagMatch = outerHTML.match(openingTagRegex);
+
+        if (tagMatch) {
+            const childInsertionInd = tagMatch[0].length;
+            const newLineWithIndent = childIndent?.newlineType && childIndent?.indent ? `${childIndent?.newlineType}${childIndent?.indent}` : '';
+
+            return outerHTML.substring(0, childInsertionInd) + newLineWithIndent + child + outerHTML.substring(childInsertionInd);
+        }
+
+        return this.outerHTML;
     }
 }

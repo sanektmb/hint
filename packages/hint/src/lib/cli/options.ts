@@ -74,7 +74,8 @@ export const options = optionator({
         },
         {
             alias: 't',
-            description: 'Explicitly specify if enable telemetry or not',
+            default: 'off',
+            description: 'DEPRECATED: Explicitly specify if enable telemetry or not',
             enum: ['on', 'off'],
             option: 'telemetry',
             type: 'String'

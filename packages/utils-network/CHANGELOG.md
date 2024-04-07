@@ -1,3 +1,95 @@
+# 1.0.26 (June 27, 2023)
+
+## Bug fixes / Improvements
+
+* [[`ee526dee46`](https://github.com/webhintio/hint/commit/ee526dee4628f7acb300176171e910c149160c71)] - Fix: Reverting node-fetch to v2 (by [`Vidal Ortega`](https://github.com/vidorteg) / see also: [`#5618`](https://github.com/webhintio/hint/issues/5618)).
+
+
+# 1.0.25 (June 8, 2023)
+
+## Chores
+
+* [[`a44ec65bd0`](https://github.com/webhintio/hint/commit/a44ec65bd02078e7d6110ebe0e6ee1b107529c87)] - Upgrade: Bump eslint-plugin-import from 2.26.0 to 2.27.5 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5481`](https://github.com/webhintio/hint/issues/5481)).
+* [[`cdf005dc2d`](https://github.com/webhintio/hint/commit/cdf005dc2d610963d54db65d0066510db26cf84c)] - Upgrade: Bump node-fetch from 2.6.7 to 3.3.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5499`](https://github.com/webhintio/hint/issues/5499)).
+* [[`5f2e5c418b`](https://github.com/webhintio/hint/commit/5f2e5c418b8d7d61e07d7e3e9655cc5ccb094979)] - Upgrade: Bump rimraf from 3.0.2 to 5.0.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5550`](https://github.com/webhintio/hint/issues/5550)).
+* [[`e95fcdf37f`](https://github.com/webhintio/hint/commit/e95fcdf37f979e26f6072c19b98cf7c17db1d199)] - Upgrade: Bump content-type from 1.0.4 to 1.0.5 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5506`](https://github.com/webhintio/hint/issues/5506)).
+
+
+# 1.0.23 (October 6, 2022)
+
+## Chores
+
+* [[`005e962584`](https://github.com/webhintio/hint/commit/005e9625841970bdd80d3a3780721220e9e0dfa7)] - Upgrade: Bump ava from 4.0.1 to 4.3.3 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5310`](https://github.com/webhintio/hint/issues/5310)).
+
+
+# 1.0.22 (September 6, 2022)
+
+## Breaking Changes
+
+* [[`3b71aaa5b8`](https://github.com/webhintio/hint/commit/3b71aaa5b8bae23ea0597912b5328a5785ab377c)] - Breaking : Remove 'request' dependency (#5243) (by [`Vidal Ortega`](https://github.com/vidorteg)).
+
+## New features
+
+* [[`941e2e0192`](https://github.com/webhintio/hint/commit/941e2e0192b6ea70abb481594c3ab177771f81f3)] - Update: Bumps node-fetch version and dependencies (by [`Vidal Ortega`](https://github.com/vidorteg) / see also: [`#5300`](https://github.com/webhintio/hint/issues/5300)).
+
+
+# 1.0.19 (June 13, 2022)
+
+## New features
+
+* [[`9474a768e9`](https://github.com/webhintio/hint/commit/9474a768e97d08eb92a92f2659efafdfcfe08e1e)] - Update: Forcing json-schema to be ^0.4.0 (by [`Vidal Ortega`](https://github.com/vidorteg)).
+
+
+# 1.0.17 (May 3, 2022)
+
+## Chores
+
+* [[`8789e1e673`](https://github.com/webhintio/hint/commit/8789e1e67334c34290065b30b676f0125f288ad4)] - Upgrade: Bump eslint-plugin-import from 2.25.4 to 2.26.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5140`](https://github.com/webhintio/hint/issues/5140)).
+
+
+# 1.0.15 (March 9, 2022)
+
+## Bug fixes / Improvements
+
+* [[`0a4ac7b39d`](https://github.com/webhintio/hint/commit/0a4ac7b39d198bf935e08de5022e1b8483ef8068)] - Fix: Add regex to disable header hints for local files (#5038) (by [`flynnolivia`](https://github.com/flynnolivia)).
+
+## Chores
+
+* [[`682dd7e533`](https://github.com/webhintio/hint/commit/682dd7e5333459ad7a0331cc86316c41f2042323)] - Upgrade: Bump ava from 3.15.0 to 4.0.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#5001`](https://github.com/webhintio/hint/issues/5001)).
+* [[`de1ef98436`](https://github.com/webhintio/hint/commit/de1ef9843660c912f6a4e05ee741d25c6eddd01e)] - Upgrade: Bump typescript from 4.3.5 to 4.5.5 (by [`dependabot[bot]`](https://github.com/apps/dependabot) / see also: [`#4996`](https://github.com/webhintio/hint/issues/4996)).
+* [[`642153c053`](https://github.com/webhintio/hint/commit/642153c053f8fafe3c1140456cb9da4010dc146a)] - Upgrade: Bump sinon from 13.0.0 to 13.0.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`c95b2bb7f7`](https://github.com/webhintio/hint/commit/c95b2bb7f711c94945c50c8dc4465fe5ceec57c4)] - Upgrade: Bump eslint-plugin-import from 2.25.3 to 2.25.4 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`874bc8ee8d`](https://github.com/webhintio/hint/commit/874bc8ee8d5937ee3cc6ff979284a2d57e2f1c6f)] - Upgrade: Bump sinon from 12.0.1 to 13.0.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`7dfef85ed6`](https://github.com/webhintio/hint/commit/7dfef85ed680b533d7f9b099effcbf528fb1f072)] - Upgrade: Bump eslint-plugin-import from 2.25.2 to 2.25.3 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`6324037022`](https://github.com/webhintio/hint/commit/6324037022ef35767571bfb5aaa9c17384231ebc)] - Upgrade: Bump eslint from 7.29.0 to 7.32.0 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`8fae9a456b`](https://github.com/webhintio/hint/commit/8fae9a456ba79b3f2d1c608daeab911c237b9aec)] - Upgrade: Bump sinon from 9.2.4 to 12.0.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+
+
+# 1.0.13 (November 4, 2021)
+
+## Chores
+
+* [[`7173d6721d`](https://github.com/webhintio/hint/commit/7173d6721d1cbca66347a5040c0b81db8b01f993)] - Upgrade: Bump eslint-plugin-import from 2.23.4 to 2.25.2 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+
+
+# 1.0.12 (October 29, 2021)
+
+## Bug fixes / Improvements
+
+* [[`2bb34e188a`](https://github.com/webhintio/hint/commit/2bb34e188aa7fa4666f1ab3c758fb0e56ec7a3eb)] - Fix: Restore handling relative file paths in getAsUri (by [`Tony Ross`](https://github.com/antross) / see also: [`#4836`](https://github.com/webhintio/hint/issues/4836)).
+
+
+# 1.0.11 (October 21, 2021)
+
+## Chores
+
+* [[`2d60bc97ad`](https://github.com/webhintio/hint/commit/2d60bc97adb2ccbd608247d7083c2a3486832895)] - Upgrade: Bump typescript from 4.2.4 to 4.3.5 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview) / see also: [`#4675`](https://github.com/webhintio/hint/issues/4675)).
+* [[`3923e6cc84`](https://github.com/webhintio/hint/commit/3923e6cc84dfdfa5120cf1b877be8257e068e0a7)] - Upgrade: Bump eslint-plugin-markdown from 2.2.0 to 2.2.1 (by [`dependabot[bot]`](https://github.com/apps/dependabot)).
+* [[`e9b2e3f423`](https://github.com/webhintio/hint/commit/e9b2e3f4232f50d1c9dba44f250629f878b13f4f)] - Upgrade: Bump eslint-plugin-import from 2.22.1 to 2.23.4 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+* [[`d64010c7f5`](https://github.com/webhintio/hint/commit/d64010c7f53c45b11bf02e704baaf1cc61b5ed28)] - Chore: Remove file-url in favor of simpler inline logic (by [`Tony Ross`](https://github.com/antross) / see also: [`#4469`](https://github.com/webhintio/hint/issues/4469)).
+* [[`2b8ce4e4aa`](https://github.com/webhintio/hint/commit/2b8ce4e4aac6c3802643606be8973c9e01a573af)] - Upgrade: Bump eslint from 7.27.0 to 7.29.0 (by [`dependabot-preview[bot]`](https://github.com/apps/dependabot-preview)).
+
+
 # 1.0.10 (June 9, 2021)
 
 ## Bug fixes / Improvements

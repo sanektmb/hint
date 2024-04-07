@@ -3,7 +3,7 @@ import * as url from 'url';
 
 import * as sinon from 'sinon';
 import * as proxyquire from 'proxyquire';
-import anyTest, { TestInterface, ExecutionContext } from 'ava';
+import anyTest, { TestFn, ExecutionContext } from 'ava';
 
 import { delay } from '@hint/utils';
 
@@ -22,7 +22,7 @@ type EngineContext = {
     eventemitter: EventEmitter2;
 };
 
-const test = anyTest as TestInterface<EngineContext>;
+const test = anyTest as TestFn<EngineContext>;
 
 
 // import { Engine } from '../../src/lib/engine';
@@ -732,7 +732,7 @@ test(`If there is no connector, it should throw an error`, (t) => {
     try {
         new Engine({ connector: { name: 'invalidConnector' } } as Configuration, { connector: null } as any);
     } catch (err) {
-        t.is(err.message, 'Connector "invalidConnector" not found');
+        t.is((err as Error).message, 'Connector "invalidConnector" not found');
     }
 });
 
@@ -966,7 +966,7 @@ test('If connector.collect fails, it should return an error', async (t) => {
     try {
         await engineObject.executeOn(localUrl);
     } catch (err) {
-        t.is(err.message, 'Error runing collect');
+        t.is((err as Error).message, 'Error runing collect');
     }
 });
 

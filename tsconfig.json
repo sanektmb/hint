@@ -47,7 +47,6 @@
         { "path": "packages/formatter-stylish" },
         { "path": "packages/formatter-summary" },
         { "path": "packages/hint" },
-        { "path": "packages/hint-amp-validator" },
         { "path": "packages/hint-apple-touch-icons" },
         { "path": "packages/hint-axe" },
         { "path": "packages/hint-babel-config" },
@@ -56,6 +55,7 @@
         { "path": "packages/hint-content-type" },
         { "path": "packages/hint-create-element-svg" },
         { "path": "packages/hint-css-prefix-order" },
+        { "path": "packages/hint-detect-css-reflows" },
         { "path": "packages/hint-disown-opener" },
         { "path": "packages/hint-doctype" },
         { "path": "packages/hint-highest-available-document-mode" },
@@ -121,7 +121,6 @@
         { "path": "packages/utils-json" },
         { "path": "packages/utils-network" },
         { "path": "packages/utils-string" },
-        { "path": "packages/utils-telemetry" },
         { "path": "packages/utils-tests-helpers" },
         { "path": "packages/utils-types" },
         { "path": "packages/utils-worker" }

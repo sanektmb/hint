@@ -3,7 +3,7 @@ import { Stream } from 'stream';
 
 import * as Chokidar from 'chokidar';
 import * as sinon from 'sinon';
-import anyTest, { TestInterface } from 'ava';
+import anyTest, { TestFn } from 'ava';
 import * as proxyquire from 'proxyquire';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -20,7 +20,7 @@ type SandboxContext = {
     sandbox: sinon.SinonSandbox;
 };
 
-const test = anyTest as TestInterface<SandboxContext>;
+const test = anyTest as TestFn<SandboxContext>;
 
 const mockContext = (context: SandboxContext) => {
     const engine = new EventEmitter2({
@@ -315,8 +315,8 @@ test(`If watch is true, it should watch the right files`, async (t) => {
     t.true(chokidarWatchStub.calledOnce);
     t.is(args[0], '.');
     t.is(args[1].cwd, directory);
-    t.is(args[1].ignored.length, 1);
-    t.is(args[1].ignored[0], '.git/');
+    t.is((args[1].ignored as string[]).length, 1);
+    t.is((args[1].ignored as string[])[0], '.git/');
 });
 
 test(`If watch is true, it should use the .gitignore`, async (t) => {
@@ -352,9 +352,9 @@ test(`If watch is true, it should use the .gitignore`, async (t) => {
     t.true(chokidarWatchStub.calledOnce);
     t.is(args[0], '.');
     t.is(args[1].cwd, directory);
-    t.is(args[1].ignored.length, 2);
-    t.is(args[1].ignored[0], 'ignore.html');
-    t.is(args[1].ignored[1], '.git/');
+    t.is((args[1].ignored as string[]).length, 2);
+    t.is((args[1].ignored as string[])[0], 'ignore.html');
+    t.is((args[1].ignored as string[])[1], '.git/');
 });
 
 test(`When the watcher is ready, it should emit the scan::end event`, async (t) => {
@@ -577,6 +577,6 @@ test('If target is a not a file, it should throw and exception', async (t) => {
     try {
         await connector.collect(new URL('https://example.com'));
     } catch (err) {
-        t.is(err.message, 'Connector local only works with local files or directories');
+        t.is((err as Error).message, 'Connector local only works with local files or directories');
     }
 });

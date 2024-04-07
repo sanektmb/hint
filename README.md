@@ -10,11 +10,11 @@ webhint is a customizable linting tool that helps you improve your site's
 accessibility, speed, cross-browser compatibility, and more by checking your
 code for best practices and common errors.
 
-It can be run from the command line (CLI), via a [browser extension][], as a
-[VS Code extension][], and from the [online service][].
+It can be run from the command line (CLI), via a [browser extension][], and as
+a [VS Code extension][].
 
 To use it from the CLI you will need to install [`Node.js`][node]
-(v10.x or later) on your machine, and you can use [`npx`][npx] to test it.
+(v14.x or later) on your machine, and you can use [`npx`][npx] to test it.
 
 ### Testing with `npx`
 
@@ -114,19 +114,18 @@ The code is available under the [Apache 2.0 license][license].
 <!-- Link labels: -->
 
 [browser extension]: https://webhint.io/docs/user-guide/extensions/extension-browser/
-[charter]: ./packages/hint/docs/about/PROJECT_CHARTER-draft.md
+[charter]: ./packages/hint/docs/about/PROJECT_CHARTER.md
 [coc]: https://github.com/webhintio/.github/blob/main/CODE_OF_CONDUCT
 [contrib browser]: ./packages/extension-browser/CONTRIBUTING.md
 [contrib vscode]: ./packages/extension-vscode/CONTRIBUTING.md
 [contributor guide]: https://webhint.io/docs/contributor-guide/
-[Governance]: ./packages/hint/docs/about/GOVERNANCE-draft.md
+[Governance]: ./packages/hint/docs/about/GOVERNANCE.md
 [license]: LICENSE.txt
 [local contributor guide]: ./packages/hint/docs/contributor-guide/index.md
 [local user guide]: ./packages/hint/docs/user-guide/index.md
 [node]: https://nodejs.org/en/download/current/
 [npx]: https://github.com/zkat/npx
-[ojs coc]: https://github.com/openjs-foundation/cross-project-council/blob/master/CODE_OF_CONDUCT.md
-[online service]: https://webhint.io/scanner/
+[ojs coc]: https://code-of-conduct.openjsf.org/
 [user guide]: https://webhint.io/docs/user-guide/
 [VS Code extension]: https://webhint.io/docs/user-guide/extensions/vscode-webhint/
 [yarn]: http://yarnpkg.com/

@@ -1,7 +1,7 @@
 import isEqual = require('lodash/isEqual');
 import * as proxyquire from 'proxyquire';
 import * as sinon from 'sinon';
-import anyTest, { TestInterface, ExecutionContext } from 'ava';
+import anyTest, { TestFn, ExecutionContext } from 'ava';
 
 import * as utils from '@hint/utils';
 
@@ -59,7 +59,7 @@ type CreateHintRCContext = {
     promisifyObject: PromisifyObject;
 };
 
-const test = anyTest as TestInterface<CreateHintRCContext>;
+const test = anyTest as TestFn<CreateHintRCContext>;
 
 const formatters = [
     'formatter1',
@@ -82,10 +82,6 @@ const loadScript = (context: CreateHintRCContext): () => Promise<boolean> => {
     const initHintrc = proxyquire('../src/create-hintrc', {
         './browserslist': context.stubBrowserslistObject,
         '@hint/utils': {
-            appInsights: {
-                sendPendingData() { },
-                trackEvent() { }
-            },
             getOfficialPackages: context.npm.getOfficialPackages,
             installPackages: context.npm.installPackages,
             logger: context.logger

@@ -1,8 +1,11 @@
+/* eslint-disable multiline-comment-style */
+import * as fs from 'fs';
+import * as path from 'path';
 import { generateHTMLPage } from '@hint/utils-create-server';
 import { getHintPath, HintTest, testHint } from '@hint/utils-tests-helpers';
 import { Severity } from '@hint/utils-types';
 
-const metaCharset = '<mEtA CHaRseT="UtF-8">';
+const metaCharset = '<meta charset="UtF-8">';
 const metaHttpEquiv = '<MeTa HTTP-EquiV="ConTent-Type" Content="TexT/HTML; CharSet=UtF-8">';
 
 const metaElementCanBeShorterErrorMessage = `'charset' meta element should be specified using shorter '<meta charset="utf-8">' form.`;
@@ -16,6 +19,7 @@ const tests: HintTest[] = [
     {
         name: `'charset' meta element is not specified`,
         reports: [{
+            fixes: {match: generateHTMLPage(`<meta charset="utf-8">\n        <title>test</title>`)},
             message: metaElementNotSpecifiedErrorMessage,
             severity: Severity.warning
         }],
@@ -24,6 +28,7 @@ const tests: HintTest[] = [
     {
         name: `'http-equiv' meta element is specified`,
         reports: [{
+            fixes: { match: generateHTMLPage('<meta charset="utf-8">')},
             message: metaElementCanBeShorterErrorMessage,
             severity: Severity.warning
         }],
@@ -32,6 +37,7 @@ const tests: HintTest[] = [
     {
         name: `'charset' meta element is specified with a value of 'utf8' instead of 'utf-8'`,
         reports: [{
+            fixes: { match: generateHTMLPage('<meta charset="utf-8">')},
             message: metaElementHasIncorrectValueErrorMessage,
             severity: Severity.warning
         }],
@@ -53,10 +59,12 @@ const tests: HintTest[] = [
         name: `'charset' meta element is specified in the '<body>'`,
         reports: [
             {
+                fixes: { match: generateHTMLPage(`${metaCharset}\n        <title>test</title>`, undefined) },
                 message: metaElementIsNotFirstInHeadErrorMessage,
                 severity: Severity.hint
             },
             {
+                fixes: { match: generateHTMLPage(`${metaCharset}\n        <title>test</title>`, undefined) },
                 message: metaElementIsNotInHeadErrorMessage,
                 severity: Severity.error
             }
@@ -66,6 +74,7 @@ const tests: HintTest[] = [
     {
         name: `'charset' meta element is specified in '<head>' after another element`,
         reports: [{
+            fixes: { match: generateHTMLPage('<meta charset="utf-8">\n        <title>test</title>') },
             message: metaElementIsNotFirstInHeadErrorMessage,
             severity: Severity.hint
         }],
@@ -74,6 +83,7 @@ const tests: HintTest[] = [
     {
         name: `'charset' meta element is specified in '<head>' after an HTML comment`,
         reports: [{
+            fixes: { match: generateHTMLPage('<meta charset="utf-8">\n        <!-- test -->') },
             message: metaElementIsNotFirstInHeadErrorMessage,
             severity: Severity.hint
         }],
@@ -82,6 +92,7 @@ const tests: HintTest[] = [
     {
         name: `'charset' meta element is specified in '<head>' after an HTML comment bigger than 1024 bytes`,
         reports: [{
+            fixes: { match: generateHTMLPage(`<meta charset="utf-8">\n        <!-- test ${' '.repeat(1024)}-->`) },
             message: metaElementIsNotFirstInHeadErrorMessage,
             severity: Severity.error
         }],
@@ -90,6 +101,7 @@ const tests: HintTest[] = [
     {
         name: `Multiple meta 'charset' elements are specified`,
         reports: [{
+            fixes: { match: generateHTMLPage(`${metaCharset}`) },
             message: metaElementIsNotNeededErrorMessage,
             severity: Severity.warning
         }],
@@ -113,6 +125,17 @@ const tests: HintTest[] = [
     {
         name: `Meta 'charset' is injected after load, should fail`,
         reports: [{
+            fixes: {
+                match: generateHTMLPage(`<meta charset="utf-8">
+        <title>No charset</title>
+        <script>
+            var head = document.querySelector('head');
+            var meta = document.createElement('meta');
+            var title = document.querySelector('title');
+            meta.setAttribute('charset', 'utf-8');
+            head.insertBefore(meta, title);
+        </script>`)
+            },
             message: metaElementNotSpecifiedErrorMessage,
             severity: Severity.warning
         }],
@@ -128,6 +151,14 @@ const tests: HintTest[] = [
     {
         name: `Resource is not an HTML document`,
         serverConfig: { '/': { headers: { 'Content-Type': 'image/png' } } }
+    },
+    {
+        name: `Gracefully handles empty <head> tag`,
+        reports: [{
+            message: metaElementNotSpecifiedErrorMessage,
+            severity: Severity.warning
+        }],
+        serverConfig: fs.readFileSync(path.join(__dirname, 'fixtures', 'repro.html'), 'utf-8') // eslint-disable-line
     }
 ];
 

@@ -1,9 +1,10 @@
 const path = require('path');
 const fs = require('fs');
 
-const execa = require('execa');
-const request = require('request');
+const fetch = require('node-fetch');
 const unzipper = require('unzipper');
+
+const { exec } = require('../utils/exec');
 
 // Files that can be updated via the prebuild step but are safe to ignore in the build process
 const thirdPartyFiles = [
@@ -12,7 +13,7 @@ const thirdPartyFiles = [
 ];
 
 const getCurrentCommitHash = async () => {
-    const { stdout: hash } = await execa('git', ['rev-parse', '--verify', 'HEAD']);
+    const { stdout: hash } = await exec('git rev-parse --verify HEAD');
 
     return hash;
 };
@@ -34,7 +35,7 @@ const isThirdPartyFile = (line) => {
 };
 
 const repoClean = async () => {
-    const { stdout } = await execa('git', ['status', '--short']);
+    const { stdout } = await exec('git status --short');
 
     if (stdout !== '') {
         const lines = stdout.trim().split('\n');
@@ -50,24 +51,22 @@ const repoClean = async () => {
 const download = (fileName) => {
     const file = fs.createWriteStream(fileName);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const res = await fetch(`https://github.com/webhintio/hint/releases/download/dist/${fileName}`);
 
-        request(`https://github.com/webhintio/hint/releases/download/dist/${fileName}`, (err, res) => {
-            if (err) {
-                reject(err);
-
-                return;
-            }
-
+            res.pipe(file);
+            resolve();
             if (res.statusCode !== 200) {
                 reject(new Error(`Artifacts for ${fileName} aren't available`));
 
                 return;
             }
-        })
-            .pipe(file)
-            .on('finish', resolve)
-            .on('error', reject);
+        } catch (err) {
+            reject(err);
+
+            return;
+        }
     });
 };
 

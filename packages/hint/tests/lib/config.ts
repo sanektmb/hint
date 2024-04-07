@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import anyTest, { TestInterface, ExecutionContext } from 'ava';
+import anyTest, { TestFn, ExecutionContext } from 'ava';
 import * as sinon from 'sinon';
 import * as proxyquire from 'proxyquire';
 
@@ -24,7 +24,7 @@ type ConfigTestContext = {
     sandbox: sinon.SinonSandbox;
 };
 
-const test = anyTest.serial as TestInterface<ConfigTestContext>;
+const test = anyTest.serial as TestFn<ConfigTestContext>;
 
 const initContext = (t: ExecutionContext<ConfigTestContext>) => {
     const os = {
@@ -103,7 +103,7 @@ test(`if package.json is an invalid JSON, it should return an exception`, (t) =>
         config.Configuration.loadConfigFile(path.join(__dirname, './fixtures/exception/package.json'), null);
     });
 
-    t.true(error.message.startsWith('Cannot read config file: '));
+    t.true(error?.message.startsWith('Cannot read config file: '));
 });
 
 test(`if the config file doesn't have an extension, it should be parsed as JSON file`, (t) => {
@@ -323,7 +323,7 @@ test(`if the configuration file contains an invalid extends property, returns an
         config.Configuration.fromConfig(userConfig, { watch: false });
     });
 
-    t.is(err.message, 'Configuration package "basics" is not valid');
+    t.is(err?.message, 'Configuration package "basics" is not valid');
 });
 
 test(`if a Hint has an invalid configuration, it should tell which ones are invalid`, (t) => {
@@ -449,4 +449,32 @@ test('If both hints and formatters options are specified in the options, fromCon
     // verify hints
     t.is(result.hints.hasOwnProperty('html-checker'), true);
     t.is(result.hints.hasOwnProperty('apple-touch-icons'), false);
+});
+
+test('IE is excluded from the default browsers list', (t) => {
+    const userConfig = {
+        connector: { name: 'puppeteer' },
+        hints: { 'apple-touch-icons': 'warning' }
+    };
+    const config = loadScript(t.context);
+    const result = config.Configuration.fromConfig(userConfig);
+    const ie = result.browserslist.filter((b: string) => {
+        return b.startsWith('ie ');
+    });
+
+    t.is(ie.length, 0, `No versions of IE should be present. Found: ${ie.join(', ')}`);
+});
+
+test('IE is included if requested', (t) => {
+    const userConfig = {
+        browserslist: ['defaults', 'IE 11'],
+        connector: { name: 'puppeteer' },
+        hints: { 'apple-touch-icons': 'warning' }
+    };
+    const config = loadScript(t.context);
+    const result = config.Configuration.fromConfig(userConfig);
+
+    t.true(result.browserslist.some((b: string) => {
+        return b === 'ie 11';
+    }), 'Requested version of IE should be present');
 });
