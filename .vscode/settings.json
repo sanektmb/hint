@@ -7,8 +7,16 @@
         "typescriptreact"
     ],
     "files.exclude": {
+        "": true,
         "**/*.css.d.ts": true
     },
     "files.insertFinalNewline": true,
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "search.useGlobalIgnoreFiles": true,
+    "search.useParentIgnoreFiles": true,
+    "search.exclude": {
+        "": true
+    },
+    "explorer.excludeGitIgnore": true,
+    "explorer.fileNesting.enabled": true
 }
